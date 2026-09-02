@@ -1,0 +1,51 @@
+version: "3.8"
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: osteoguard_api
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql+psycopg2://osteouser:osteopass@postgres:5432/osteoguard
+      - SECRET_KEY=09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7
+      - ENVIRONMENT=development
+      - ENABLE_DEMO_MODE=true
+      - MODEL_PROVIDER=rule_based
+      - LOG_LEVEL=INFO
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - .:/app
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: osteoguard_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: osteouser
+      POSTGRES_PASSWORD: osteopass
+      POSTGRES_DB: osteoguard
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U osteouser -d osteoguard"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: osteoguard_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+
+volumes:
+  postgres_data:

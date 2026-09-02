@@ -1,0 +1,50 @@
+name: Mobile App CI/CD
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  flutter_build:
+    name: Flutter Lint, Test & APK Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.19.x'
+          channel: 'stable'
+          cache: true
+
+      - name: Install dependencies
+        working-directory: mobile_app
+        run: flutter pub get
+
+      - name: Analyze code
+        working-directory: mobile_app
+        run: flutter analyze --no-fatal-infos
+
+      - name: Run unit & widget tests
+        working-directory: mobile_app
+        run: flutter test
+
+      - name: Build Debug APK
+        working-directory: mobile_app
+        run: flutter build apk --debug
+
+      - name: Upload Debug APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: osteoguard-debug-apk
+          path: mobile_app/build/app/outputs/flutter-apk/app-debug.apk
