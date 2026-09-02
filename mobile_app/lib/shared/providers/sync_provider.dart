@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
+import 'package:sqflite/sqflite.dart';
 import '../../core/storage/local_db.dart';
 import '../../core/networking/api_client.dart';
 import '../../core/constants/api_constants.dart';
